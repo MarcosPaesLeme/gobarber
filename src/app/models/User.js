@@ -1,0 +1,37 @@
+import Sequelize, { Model } from 'sequelize';
+import bycrypt from 'bcryptjs';
+
+class User extends Model {
+  static init(sequelize) {
+    super.init(
+      {
+        name: Sequelize.STRING,
+        email: Sequelize.STRING,
+        password: Sequelize.VIRTUAL, // Significa que ele nunca vai existir no banco
+        password_hash: Sequelize.STRING,
+        provider: Sequelize.BOOLEAN,
+      },
+      {
+        sequelize,
+      }
+    );
+
+    this.addHook('beforeSave', async (user) => {
+      if (user.password) {
+        user.password_hash = await bycrypt.hash(user.password, 8);
+      }
+    });
+
+    return this;
+  }
+
+  static associate(models) {
+    this.belongsTo(models.File, { foreignKey: 'avatar_id', as: 'avatar' });
+  }
+
+  checkPassword(password) {
+    return bycrypt.compare(password, this.password_hash);
+  }
+}
+
+export default User;
