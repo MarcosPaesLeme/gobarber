@@ -4,7 +4,9 @@ import express from 'express';
 import { resolve } from 'path';
 import * as Sentry from '@sentry/node';
 import 'express-async-errors';
+
 import Youch from 'youch';
+import cors from 'cors';
 import routes from './routes';
 import './database';
 import sentryConfig from './config/sentry';
@@ -12,7 +14,7 @@ import sentryConfig from './config/sentry';
 class App {
   constructor() {
     this.server = express();
-
+    this.server.use(cors());
     Sentry.init(sentryConfig);
     this.middleware();
     this.routes();
